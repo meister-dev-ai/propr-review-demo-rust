@@ -89,6 +89,10 @@ impl SiteGenerator {
             }
         }
 
+        if let Ok(export_path) = env::var("ARTICLE_EXPORT_PATH") {
+            self.write_article_export(&site, &export_path)?;
+        }
+
         Ok(())
     }
 
@@ -266,6 +270,19 @@ impl SiteGenerator {
 
     fn write_file(&self, file_path: PathBuf, html: String) -> Result<(), String> {
         fs::write(file_path, html).map_err(|error| error.to_string())
+    }
+
+    fn write_article_export(&self, site: &SiteModel, export_path: &str) -> Result<(), String> {
+        let export = site
+            .sections
+            .iter()
+            .flat_map(|section| section.articles.iter())
+            .map(|article| format!("{}\t{}", article.title, article.summary))
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        eprintln!("writing export to {export_path}: {export}");
+        fs::write(export_path, export).map_err(|error| error.to_string())
     }
 
     fn render_standard_page(&self, site: &SiteModel, page: &PageModel) -> String {
