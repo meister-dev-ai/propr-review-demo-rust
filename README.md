@@ -23,3 +23,7 @@ Native Rust static blog demo for pull request review workflows.
 - `cargo test`
 - `npm install`
 - `npm run test:e2e`
+
+## Review branches
+
+- `BUG_SCENARIOS.md` lists the intentionally defective feature branches that should be reviewed against `main`.
