@@ -375,6 +375,7 @@ impl SiteGenerator {
         let navigation = site
             .navigation
             .iter()
+            .chain(site.navigation.iter())
             .map(|item| {
                 let class_name = if item.path == current_path {
                     "nav-link nav-link-active"
