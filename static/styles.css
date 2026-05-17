@@ -162,7 +162,8 @@ main {
   text-decoration: none;
 }
 
-.article-card p {
+.article-card p,
+.article-summary p {
   margin: 0.75rem 0 0;
   color: #526273;
 }
