@@ -1,0 +1,12 @@
+{
+  "name": "propr-review-demo-rust",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "cargo run -- --output dist",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}
