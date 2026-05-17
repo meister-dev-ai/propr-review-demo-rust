@@ -1,0 +1,2 @@
+# Exclude review scenario documentation from AI review input.
+BUG_SCENARIOS.md
