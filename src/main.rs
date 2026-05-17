@@ -250,6 +250,20 @@ impl SiteGenerator {
         )
         .map_err(|error| error.to_string())?;
 
+        if let Ok(extra_asset) = env::var("EXTRA_STATIC_ASSET") {
+            self.copy_optional_asset(&extra_asset)?;
+        }
+
+        Ok(())
+    }
+
+    fn copy_optional_asset(&self, asset_path: &str) -> Result<(), String> {
+        let source = self.static_directory.join(asset_path);
+        let file_name = Path::new(asset_path)
+            .file_name()
+            .ok_or_else(|| String::from("missing asset file name"))?;
+
+        fs::copy(source, self.output_directory.join(file_name)).map_err(|error| error.to_string())?;
         Ok(())
     }
 
