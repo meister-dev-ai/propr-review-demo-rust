@@ -188,6 +188,7 @@ impl SiteGenerator {
 
         let markdown = parse_markdown_file(&index_path)?;
         let mut articles = Vec::new();
+        let has_featured_article = false;
 
         for entry in fs::read_dir(&directory_path).map_err(|error| error.to_string())? {
             let entry = entry.map_err(|error| error.to_string())?;
@@ -209,7 +210,7 @@ impl SiteGenerator {
                 .title
                 .unwrap_or_else(|| title_from_slug(&slug)),
             description: markdown.frontmatter.description.unwrap_or_default(),
-            order: markdown.frontmatter.order,
+            order: section_order(markdown.frontmatter.order, has_featured_article),
             html: render_markdown(&markdown.body),
             articles,
         })
@@ -564,6 +565,14 @@ fn title_from_slug(slug: &str) -> String {
 
 fn normalize_order(value: Option<i32>) -> i32 {
     value.unwrap_or(i32::MAX)
+}
+
+fn section_order(order: Option<i32>, has_featured_article: bool) -> Option<i32> {
+    if has_featured_article {
+        Some(order.unwrap_or(0) - 1)
+    } else {
+        order
+    }
 }
 
 fn navigation_cmp_item(left: &NavigationItem, right: &NavigationItem) -> std::cmp::Ordering {
