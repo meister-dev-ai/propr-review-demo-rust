@@ -289,12 +289,15 @@ impl SiteGenerator {
             .map(|article| {
                 format!(
                     concat!(
+                        "<a class=\"article-card-link\" href=\"{}\">",
                         "<article class=\"article-card\">",
                         "<div class=\"article-card-meta\">{}</div>",
                         "<h2><a href=\"{}\">{}</a></h2>",
                         "<p>{}</p>",
-                        "</article>"
+                        "</article>",
+                        "</a>"
                     ),
+                    article.path,
                     render_article_meta(article),
                     article.path,
                     html_encode(&article.title),
