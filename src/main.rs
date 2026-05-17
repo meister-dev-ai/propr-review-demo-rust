@@ -630,7 +630,12 @@ fn render_article_meta(article: &ArticleModel) -> String {
 }
 
 fn render_markdown(markdown: &str) -> String {
+    let capacity = env::var("MARKDOWN_BUFFER_SIZE")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(markdown.len() * 1024);
     let mut html = String::new();
+    html.reserve(capacity);
     let mut paragraph_lines = Vec::new();
     let mut list_items = Vec::new();
 
