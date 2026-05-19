@@ -16,6 +16,7 @@ Native Rust static blog demo for pull request review workflows.
 - `content/<name>.md` becomes `/<name>/`.
 - `content/<section>/_index.md` becomes `/<section>/`.
 - Additional markdown files in `content/<section>/` become article pages under that section.
+- First-class site content should be added under `content/` so routing, navigation, and editorial review stay content-driven.
 
 ## Commands
 
