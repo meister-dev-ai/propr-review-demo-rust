@@ -28,3 +28,6 @@ These feature branches are intentionally defective review targets built from a c
 - `feature/bug_24`: support preview inline markers but bypass HTML escaping for lines starting with `!!`
 - `feature/bug_25`: add an import preview loader but read arbitrary files into a large environment-sized buffer
 - `feature/bug_26`: add a markdown read fallback but silently replace missing files with `content/index.md`
+- `feature/semantic_bug_1`: add docs requiring first-class content to live under `content/`, then ship a hardcoded built-in `handbook` module from generator code
+- `feature/semantic_bug_2`: add docs requiring all user-facing sections to reuse the shared section/article pipeline, then implement `showcase` through a bespoke parallel model and render path
+- `feature/semantic_bug_3`: add docs requiring navigation, routing, and discovery to be convention-derived from content structure, then inject `status` manually through special-case generator logic
