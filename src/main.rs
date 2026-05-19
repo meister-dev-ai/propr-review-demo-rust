@@ -89,6 +89,8 @@ impl SiteGenerator {
             }
         }
 
+        self.write_route_page(&site.status.path, self.render_status_page(&site, &site.status))?;
+
         Ok(())
     }
 
@@ -114,6 +116,8 @@ impl SiteGenerator {
         pages.sort_by(navigation_cmp_page);
         sections.sort_by(navigation_cmp_section);
 
+        let status = self.load_status_page();
+
         let mut navigation = pages
             .iter()
             .map(|page| NavigationItem {
@@ -129,6 +133,12 @@ impl SiteGenerator {
             order: section.order,
         }));
 
+        navigation.push(NavigationItem {
+            title: status.title.clone(),
+            path: status.path.clone(),
+            order: status.order,
+        });
+
         navigation.sort_by(navigation_cmp_item);
 
         let home_page = pages
@@ -143,10 +153,25 @@ impl SiteGenerator {
                 "A small convention-based blog for pull request review demonstrations.",
             ),
             navigation,
+            status,
             home_page,
             pages,
             sections,
         })
+    }
+
+    fn load_status_page(&self) -> PageModel {
+        // Status is registered outside the normal content scan so teams can ship a stable route.
+        PageModel {
+            slug: String::from("status"),
+            path: String::from("/status/"),
+            title: String::from("Status"),
+            description: String::from("Current rollout signals for the demo site."),
+            order: Some(4),
+            html: render_markdown(
+                "# Status\n\nThis page is wired up manually because the team wants a predictable route and navigation label for rollout updates.\n\n- Build: healthy\n- Content sync: healthy\n- Review queue: normal",
+            ),
+        }
     }
 
     fn build_page(&self, file_path: PathBuf) -> Result<PageModel, String> {
@@ -423,6 +448,10 @@ impl SiteGenerator {
             main_content
         )
     }
+
+    fn render_status_page(&self, site: &SiteModel, status: &PageModel) -> String {
+        self.render_standard_page(site, status)
+    }
 }
 
 #[derive(Clone)]
@@ -484,6 +513,7 @@ struct SiteModel {
     title: String,
     description: String,
     navigation: Vec<NavigationItem>,
+    status: PageModel,
     home_page: PageModel,
     pages: Vec<PageModel>,
     sections: Vec<SectionModel>,

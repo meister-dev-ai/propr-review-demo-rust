@@ -28,3 +28,4 @@ These feature branches are intentionally defective review targets built from a c
 - `feature/bug_24`: support preview inline markers but bypass HTML escaping for lines starting with `!!`
 - `feature/bug_25`: add an import preview loader but read arbitrary files into a large environment-sized buffer
 - `feature/bug_26`: add a markdown read fallback but silently replace missing files with `content/index.md`
+- `feature/semantic_bug_3`: document convention-derived routing and discovery but special-case status routes and navigation in code

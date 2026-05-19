@@ -16,6 +16,7 @@ Native Rust static blog demo for pull request review workflows.
 - `content/<name>.md` becomes `/<name>/`.
 - `content/<section>/_index.md` becomes `/<section>/`.
 - Additional markdown files in `content/<section>/` become article pages under that section.
+- Navigation, routing, and page discovery should come from the content tree conventions rather than feature-specific code paths.
 
 ## Commands
 
