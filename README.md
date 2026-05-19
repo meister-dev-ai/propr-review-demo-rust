@@ -16,6 +16,7 @@ Native Rust static blog demo for pull request review workflows.
 - `content/<name>.md` becomes `/<name>/`.
 - `content/<section>/_index.md` becomes `/<section>/`.
 - Additional markdown files in `content/<section>/` become article pages under that section.
+- User-facing sections should flow through the shared section/article pipeline so rendering, ordering, and navigation stay consistent.
 
 ## Commands
 
