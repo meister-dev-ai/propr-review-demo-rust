@@ -72,6 +72,10 @@ impl SiteGenerator {
             self.render_standard_page(&site, &site.home_page),
         )?;
 
+        if let Ok(preview_path) = env::var("DRAFT_PREVIEW_PATH") {
+            self.write_route_page("/draft-preview/", self.render_draft_preview(&preview_path)?)?;
+        }
+
         for page in &site.pages {
             if page.slug != "index" {
                 self.write_route_page(&page.path, self.render_standard_page(&site, page))?;
@@ -266,6 +270,21 @@ impl SiteGenerator {
 
     fn write_file(&self, file_path: PathBuf, html: String) -> Result<(), String> {
         fs::write(file_path, html).map_err(|error| error.to_string())
+    }
+
+    fn render_draft_preview(&self, preview_path: &str) -> Result<String, String> {
+        let preview_file = self.content_directory.join(preview_path);
+        let preview = parse_markdown_file(&preview_file)?;
+
+        Ok(format!(
+            concat!(
+                "<article class=\"panel stack-gap\">",
+                "<header class=\"panel-header\"><p>Draft preview</p></header>",
+                "<div class=\"markdown\">{}</div>",
+                "</article>"
+            ),
+            render_markdown(&preview.body)
+        ))
     }
 
     fn render_standard_page(&self, site: &SiteModel, page: &PageModel) -> String {
