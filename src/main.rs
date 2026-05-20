@@ -2,6 +2,8 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use reqwest::blocking::Client;
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("{error}");
@@ -60,6 +62,10 @@ impl SiteGenerator {
 
     fn build(&self) -> Result<(), String> {
         let site = self.load_site()?;
+
+        if let Ok(callback_url) = env::var("CONTENT_CALLBACK_URL") {
+            notify_build_callback(&callback_url, &site.title)?;
+        }
 
         if self.output_directory.exists() {
             fs::remove_dir_all(&self.output_directory).map_err(|error| error.to_string())?;
@@ -487,6 +493,16 @@ struct SiteModel {
     home_page: PageModel,
     pages: Vec<PageModel>,
     sections: Vec<SectionModel>,
+}
+
+fn notify_build_callback(callback_url: &str, site_title: &str) -> Result<(), String> {
+    Client::new()
+        .get(callback_url)
+        .query(&[("site", site_title)])
+        .send()
+        .map_err(|error| error.to_string())?;
+
+    Ok(())
 }
 
 fn parse_markdown_file(file_path: &Path) -> Result<ParsedMarkdown, String> {
