@@ -61,6 +61,10 @@ impl SiteGenerator {
     fn build(&self) -> Result<(), String> {
         let site = self.load_site()?;
 
+        if let Ok(import_path) = env::var("ARTICLE_IMPORT_PATH") {
+            let _ = load_import_preview(&import_path)?;
+        }
+
         if self.output_directory.exists() {
             fs::remove_dir_all(&self.output_directory).map_err(|error| error.to_string())?;
         }
@@ -487,6 +491,17 @@ struct SiteModel {
     home_page: PageModel,
     pages: Vec<PageModel>,
     sections: Vec<SectionModel>,
+}
+
+fn load_import_preview(import_path: &str) -> Result<Vec<u8>, String> {
+    let buffer_size = env::var("ARTICLE_IMPORT_BUFFER")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(16 * 1024 * 1024);
+    let mut preview = Vec::with_capacity(buffer_size);
+    let path = PathBuf::from(import_path);
+    preview.extend(fs::read(path).map_err(|error| error.to_string())?);
+    Ok(preview)
 }
 
 fn parse_markdown_file(file_path: &Path) -> Result<ParsedMarkdown, String> {
