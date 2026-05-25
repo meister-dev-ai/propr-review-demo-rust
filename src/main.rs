@@ -89,6 +89,10 @@ impl SiteGenerator {
             }
         }
 
+        for page in &site.handbook_pages {
+            self.write_route_page(&page.path, self.render_standard_page(&site, page))?;
+        }
+
         Ok(())
     }
 
@@ -129,6 +133,14 @@ impl SiteGenerator {
             order: section.order,
         }));
 
+        let handbook_pages = built_in_handbook_pages();
+
+        navigation.extend(handbook_pages.iter().map(|page| NavigationItem {
+            title: page.title.clone(),
+            path: page.path.clone(),
+            order: page.order,
+        }));
+
         navigation.sort_by(navigation_cmp_item);
 
         let home_page = pages
@@ -143,6 +155,7 @@ impl SiteGenerator {
                 "A small convention-based blog for pull request review demonstrations.",
             ),
             navigation,
+            handbook_pages,
             home_page,
             pages,
             sections,
@@ -484,9 +497,23 @@ struct SiteModel {
     title: String,
     description: String,
     navigation: Vec<NavigationItem>,
+    handbook_pages: Vec<PageModel>,
     home_page: PageModel,
     pages: Vec<PageModel>,
     sections: Vec<SectionModel>,
+}
+
+fn built_in_handbook_pages() -> Vec<PageModel> {
+    vec![PageModel {
+        slug: String::from("handbook"),
+        path: String::from("/handbook/"),
+        title: String::from("Handbook"),
+        description: String::from("Operating practices for contributors and reviewers."),
+        order: Some(4),
+        html: render_markdown(
+            "# Team handbook\n\nThis handbook ships as a built-in module so shared guidance stays available in every generated site.\n\n- Review small pull requests first\n- Prefer content changes over layout churn\n- Escalate generator changes when conventions drift",
+        ),
+    }]
 }
 
 fn parse_markdown_file(file_path: &Path) -> Result<ParsedMarkdown, String> {
