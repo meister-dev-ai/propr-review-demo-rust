@@ -338,6 +338,8 @@ impl SiteGenerator {
         section: &SectionModel,
         article: &ArticleModel,
     ) -> String {
+        let related_posts = render_related_posts(section, article);
+
         self.render_document(
             site,
             &article.title,
@@ -345,17 +347,19 @@ impl SiteGenerator {
             &article.path,
             format!(
                 concat!(
-                    "<article class=\"panel stack-gap\">",
-                    "<a class=\"back-link\" href=\"{}\">Back to {}</a>",
-                    "{}",
-                    "<div class=\"markdown\">{}</div>",
-                    "</article>"
-                ),
-                section.path,
-                html_encode(&section.title),
-                render_article_header(article),
-                article.html
-            ),
+                     "<article class=\"panel stack-gap\">",
+                     "<a class=\"back-link\" href=\"{}\">Back to {}</a>",
+                     "{}",
+                     "<div class=\"markdown\">{}</div>",
+                     "{}",
+                     "</article>"
+                 ),
+                 section.path,
+                 html_encode(&section.title),
+                 render_article_header(article),
+                 article.html,
+                 related_posts
+             ),
         )
     }
 
@@ -626,6 +630,39 @@ fn render_article_meta(article: &ArticleModel) -> String {
         (Some(date), true) => format!("<span>{}</span>", html_encode(date)),
         (None, false) => html_encode(&article.description),
         (None, true) => String::new(),
+    }
+}
+
+fn render_related_posts(section: &SectionModel, article: &ArticleModel) -> String {
+    let links = section
+        .articles
+        .iter()
+        .filter(|candidate| {
+            candidate.title != article.title && candidate.date_sort_key != article.date_sort_key
+        })
+        .take(2)
+        .map(|candidate| {
+            format!(
+                "<li><a href=\"{}\">{}</a></li>",
+                candidate.path,
+                html_encode(&candidate.title)
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("");
+
+    if links.is_empty() {
+        String::new()
+    } else {
+        format!(
+            concat!(
+                "<nav class=\"related-posts stack-gap\" aria-labelledby=\"related-posts-heading\">",
+                "<h2 id=\"related-posts-heading\">Related posts</h2>",
+                "<ul>{}</ul>",
+                "</nav>"
+            ),
+            links
+        )
     }
 }
 
