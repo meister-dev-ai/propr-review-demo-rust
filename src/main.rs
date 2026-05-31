@@ -269,15 +269,22 @@ impl SiteGenerator {
     }
 
     fn render_standard_page(&self, site: &SiteModel, page: &PageModel) -> String {
+        let latest_posts = if page.path == "/" {
+            render_latest_posts_panel(site)
+        } else {
+            String::new()
+        };
+
         self.render_document(
             site,
             &page.title,
             &page.description,
             &page.path,
             format!(
-                "<article class=\"panel stack-gap\">{}<div class=\"markdown\">{}</div></article>",
+                "<article class=\"panel stack-gap\">{}<div class=\"markdown\">{}</div>{}</article>",
                 render_panel_description(&page.description),
-                page.html
+                page.html,
+                latest_posts
             ),
         )
     }
@@ -626,6 +633,42 @@ fn render_article_meta(article: &ArticleModel) -> String {
         (Some(date), true) => format!("<span>{}</span>", html_encode(date)),
         (None, false) => html_encode(&article.description),
         (None, true) => String::new(),
+    }
+}
+
+fn render_latest_posts_panel(site: &SiteModel) -> String {
+    let mut latest_posts = site
+        .sections
+        .iter()
+        .flat_map(|section| section.articles.iter())
+        .collect::<Vec<_>>();
+    latest_posts.sort_by(|left, right| left.date_sort_key.cmp(&right.date_sort_key));
+
+    let post_links = latest_posts
+        .into_iter()
+        .take(3)
+        .map(|article| {
+            format!(
+                "<li><a href=\"{}\">{}</a></li>",
+                article.path,
+                html_encode(&article.title)
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("");
+
+    if post_links.is_empty() {
+        String::new()
+    } else {
+        format!(
+            concat!(
+                "<section class=\"stack-gap\" aria-labelledby=\"latest-posts-heading\">",
+                "<h2 id=\"latest-posts-heading\">Latest posts</h2>",
+                "<ul>{}</ul>",
+                "</section>"
+            ),
+            post_links
+        )
     }
 }
 
