@@ -286,6 +286,7 @@ impl SiteGenerator {
         let article_cards = section
             .articles
             .iter()
+            .rev()
             .map(|article| {
                 format!(
                     concat!(
