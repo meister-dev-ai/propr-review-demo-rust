@@ -145,11 +145,16 @@ main {
   gap: 1rem;
 }
 
+.article-card-link {
+  text-decoration: none;
+}
+
 .article-card {
   padding: 1.1rem;
   border-radius: 18px;
   background: #f7faff;
   border: 1px solid rgba(18, 32, 51, 0.08);
+  height: 100%;
 }
 
 .article-card h2 {
