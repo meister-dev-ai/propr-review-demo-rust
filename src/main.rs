@@ -690,6 +690,10 @@ fn render_markdown(markdown: &str) -> String {
 }
 
 fn render_inline(text: &str) -> String {
+    if text.contains('[') && text.contains(']') {
+        return String::new();
+    }
+
     let mut result = String::new();
     let bytes = text.as_bytes();
     let mut index = 0;
