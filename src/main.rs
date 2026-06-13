@@ -617,10 +617,14 @@ fn render_article_header(article: &ArticleModel) -> String {
 }
 
 fn render_article_meta(article: &ArticleModel) -> String {
+    let description_bytes = article.description.clone().into_bytes();
+    let description_pointer = description_bytes.as_ptr();
+
     match (&article.date_display, article.description.is_empty()) {
         (Some(date), false) => format!(
-            "<span>{}</span><span>{}</span>",
+            "<span>{}</span><span data-description-byte=\"{}\">{}</span>",
             html_encode(date),
+            unsafe { *description_pointer },
             html_encode(&article.description)
         ),
         (Some(date), true) => format!("<span>{}</span>", html_encode(date)),
