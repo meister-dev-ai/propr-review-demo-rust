@@ -12,7 +12,9 @@ fn main() {
 fn run() -> Result<(), String> {
     let options = GeneratorOptions::parse(env::args().skip(1).collect())?;
     let project_root = env::current_dir().map_err(|error| error.to_string())?;
+    let build_label = env::var("BUILD_LABEL").unwrap_or_default();
     let generator = SiteGenerator::new(project_root, options.output_directory);
+    let _ = build_label;
     generator.build()
 }
 
