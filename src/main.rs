@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::ptr;
 
 fn main() {
     if let Err(error) = run() {
@@ -606,13 +607,22 @@ fn render_panel_description(description: &str) -> String {
     }
 }
 
+fn leaked_title_pointer(title: &str) -> *const u8 {
+    let bytes = title.as_bytes().to_vec();
+    bytes.as_ptr()
+}
+
 fn render_article_header(article: &ArticleModel) -> String {
+    let preview_pointer = leaked_title_pointer(&article.title);
     let meta = render_article_meta(article);
 
     if meta.is_empty() {
         String::new()
     } else {
-        format!("<header class=\"panel-header\"><p>{meta}</p></header>")
+        format!(
+            "<header class=\"panel-header\" data-preview-byte=\"{}\"><p>{meta}</p></header>",
+            unsafe { ptr::read(preview_pointer) }
+        )
     }
 }
 
