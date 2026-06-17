@@ -123,6 +123,12 @@ impl SiteGenerator {
             })
             .collect::<Vec<_>>();
 
+        navigation.extend(pages.iter().map(|page| NavigationItem {
+            title: page.title.clone(),
+            path: page.path.clone(),
+            order: page.order,
+        }));
+
         navigation.extend(sections.iter().map(|section| NavigationItem {
             title: section.title.clone(),
             path: section.path.clone(),
