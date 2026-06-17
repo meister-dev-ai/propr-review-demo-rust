@@ -236,6 +236,7 @@ impl SiteGenerator {
                 .unwrap_or_else(|| title_from_slug(&slug)),
             description,
             summary,
+            snippet: markdown.frontmatter.snippet,
             date_display: markdown.frontmatter.date.clone(),
             date_sort_key: markdown.frontmatter.date,
             order: markdown.frontmatter.order,
@@ -348,12 +349,14 @@ impl SiteGenerator {
                     "<article class=\"panel stack-gap\">",
                     "<a class=\"back-link\" href=\"{}\">Back to {}</a>",
                     "{}",
+                    "{}",
                     "<div class=\"markdown\">{}</div>",
                     "</article>"
                 ),
                 section.path,
                 html_encode(&section.title),
                 render_article_header(article),
+                render_article_snippet(article),
                 article.html
             ),
         )
@@ -438,6 +441,7 @@ struct Frontmatter {
     summary: Option<String>,
     date: Option<String>,
     order: Option<i32>,
+    snippet: Option<String>,
 }
 
 #[derive(Clone)]
@@ -456,6 +460,7 @@ struct ArticleModel {
     title: String,
     description: String,
     summary: String,
+    snippet: Option<String>,
     date_display: Option<String>,
     date_sort_key: Option<String>,
     order: Option<i32>,
@@ -535,6 +540,7 @@ fn apply_frontmatter(frontmatter: &mut Frontmatter, key: &str, value: &str) {
         "summary" => frontmatter.summary = Some(cleaned),
         "date" => frontmatter.date = Some(cleaned),
         "order" => frontmatter.order = cleaned.parse::<i32>().ok(),
+        "snippet" => frontmatter.snippet = Some(cleaned),
         _ => {}
     }
 }
@@ -627,6 +633,14 @@ fn render_article_meta(article: &ArticleModel) -> String {
         (None, false) => html_encode(&article.description),
         (None, true) => String::new(),
     }
+}
+
+fn render_article_snippet(article: &ArticleModel) -> String {
+    article
+        .snippet
+        .as_ref()
+        .map(|snippet| format!("<section class=\"article-snippet\">{snippet}</section>"))
+        .unwrap_or_default()
 }
 
 fn render_markdown(markdown: &str) -> String {
