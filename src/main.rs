@@ -227,6 +227,7 @@ impl SiteGenerator {
             .frontmatter
             .summary
             .unwrap_or_else(|| description.clone());
+        let html = render_markdown(&markdown.body);
 
         Ok(ArticleModel {
             path: format!("/{section_slug}/{slug}/"),
@@ -238,8 +239,9 @@ impl SiteGenerator {
             summary,
             date_display: markdown.frontmatter.date.clone(),
             date_sort_key: markdown.frontmatter.date,
+            reading_time_minutes: estimate_reading_time_minutes(&html),
             order: markdown.frontmatter.order,
-            html: render_markdown(&markdown.body),
+            html,
         })
     }
 
@@ -458,6 +460,7 @@ struct ArticleModel {
     summary: String,
     date_display: Option<String>,
     date_sort_key: Option<String>,
+    reading_time_minutes: usize,
     order: Option<i32>,
     html: String,
 }
@@ -617,16 +620,28 @@ fn render_article_header(article: &ArticleModel) -> String {
 }
 
 fn render_article_meta(article: &ArticleModel) -> String {
-    match (&article.date_display, article.description.is_empty()) {
-        (Some(date), false) => format!(
-            "<span>{}</span><span>{}</span>",
-            html_encode(date),
-            html_encode(&article.description)
-        ),
-        (Some(date), true) => format!("<span>{}</span>", html_encode(date)),
-        (None, false) => html_encode(&article.description),
-        (None, true) => String::new(),
+    let mut parts = Vec::new();
+
+    if let Some(date) = &article.date_display {
+        parts.push(html_encode(date));
     }
+
+    parts.push(format!("{} min read", article.reading_time_minutes));
+
+    if !article.description.is_empty() {
+        parts.push(html_encode(&article.description));
+    }
+
+    parts
+        .into_iter()
+        .map(|part| format!("<span>{part}</span>"))
+        .collect::<Vec<_>>()
+        .join("")
+}
+
+fn estimate_reading_time_minutes(rendered_html: &str) -> usize {
+    let word_count = rendered_html.split_whitespace().count();
+    (word_count / 200).max(1)
 }
 
 fn render_markdown(markdown: &str) -> String {
