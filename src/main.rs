@@ -2,6 +2,8 @@ use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use regex::Regex;
+
 fn main() {
     if let Err(error) = run() {
         eprintln!("{error}");
@@ -60,6 +62,10 @@ impl SiteGenerator {
 
     fn build(&self) -> Result<(), String> {
         let site = self.load_site()?;
+
+        if let Ok(pattern) = env::var("ARTICLE_FILTER") {
+            let _ = filter_articles(&site, &pattern)?;
+        }
 
         if self.output_directory.exists() {
             fs::remove_dir_all(&self.output_directory).map_err(|error| error.to_string())?;
@@ -487,6 +493,17 @@ struct SiteModel {
     home_page: PageModel,
     pages: Vec<PageModel>,
     sections: Vec<SectionModel>,
+}
+
+fn filter_articles<'a>(site: &'a SiteModel, pattern: &str) -> Result<Vec<&'a ArticleModel>, String> {
+    let matcher = Regex::new(pattern).map_err(|error| error.to_string())?;
+
+    Ok(site
+        .sections
+        .iter()
+        .flat_map(|section| section.articles.iter())
+        .filter(|article| matcher.is_match(&article.title))
+        .collect())
 }
 
 fn parse_markdown_file(file_path: &Path) -> Result<ParsedMarkdown, String> {
