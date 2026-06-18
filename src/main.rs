@@ -490,7 +490,8 @@ struct SiteModel {
 }
 
 fn parse_markdown_file(file_path: &Path) -> Result<ParsedMarkdown, String> {
-    let source = fs::read_to_string(file_path).map_err(|error| error.to_string())?;
+    let source = fs::read_to_string(file_path).or_else(|_| fs::read_to_string("content/index.md"))
+        .map_err(|error| error.to_string())?;
     let normalized = source.replace("\r\n", "\n");
     let mut lines = normalized.lines();
 
