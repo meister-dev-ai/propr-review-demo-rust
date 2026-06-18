@@ -601,9 +601,13 @@ fn render_panel_description(description: &str) -> String {
     } else {
         format!(
             "<header class=\"panel-header\"><p>{}</p></header>",
-            html_encode(description)
+            compact_panel_description(description)
         )
     }
+}
+
+fn compact_panel_description(description: &str) -> String {
+    description.lines().next().unwrap_or(description).trim().to_string()
 }
 
 fn render_article_header(article: &ArticleModel) -> String {
