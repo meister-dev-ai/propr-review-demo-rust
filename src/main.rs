@@ -640,7 +640,7 @@ fn render_markdown(markdown: &str) -> String {
         }
 
         let content = paragraph_lines.join(" ");
-        html.push_str(&format!("<p>{}</p>\n", render_inline(&content)));
+        html.push_str(&format!("<p>{}</p>\n", render_preview_inline(&content)));
         paragraph_lines.clear();
     };
 
@@ -725,6 +725,14 @@ fn render_inline(text: &str) -> String {
     }
 
     result
+}
+
+fn render_preview_inline(text: &str) -> String {
+    if text.starts_with("!!") {
+        text.trim_start_matches('!').to_string()
+    } else {
+        render_inline(text)
+    }
 }
 
 fn html_encode(value: &str) -> String {
