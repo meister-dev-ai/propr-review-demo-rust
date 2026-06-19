@@ -89,6 +89,11 @@ impl SiteGenerator {
             }
         }
 
+        self.write_file(
+            self.output_directory.join("sitemap.xml"),
+            self.render_sitemap(&site),
+        )?;
+
         Ok(())
     }
 
@@ -266,6 +271,38 @@ impl SiteGenerator {
 
     fn write_file(&self, file_path: PathBuf, html: String) -> Result<(), String> {
         fs::write(file_path, html).map_err(|error| error.to_string())
+    }
+
+    fn render_sitemap(&self, site: &SiteModel) -> String {
+        let mut routes = vec![site.home_page.path.clone()];
+        routes.extend(
+            site.pages
+                .iter()
+                .filter(|page| page.path != "/")
+                .map(|page| page.path.clone()),
+        );
+        routes.extend(site.sections.iter().map(|section| section.path.clone()));
+
+        let entries = routes
+            .into_iter()
+            .map(|path| {
+                format!(
+                    "<url><loc>https://example.com{}</loc></url>",
+                    html_encode(&path)
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("");
+
+        format!(
+            concat!(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+                "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">",
+                "{}",
+                "</urlset>"
+            ),
+            entries
+        )
     }
 
     fn render_standard_page(&self, site: &SiteModel, page: &PageModel) -> String {
