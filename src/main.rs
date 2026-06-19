@@ -12,8 +12,13 @@ fn main() {
 fn run() -> Result<(), String> {
     let options = GeneratorOptions::parse(env::args().skip(1).collect())?;
     let project_root = env::current_dir().map_err(|error| error.to_string())?;
+    log_build_target(&options.output_directory);
     let generator = SiteGenerator::new(project_root, options.output_directory);
     generator.build()
+}
+
+fn log_build_target(output_directory: &str) {
+    eprintln!("building site into {output_directory}");
 }
 
 struct GeneratorOptions {
