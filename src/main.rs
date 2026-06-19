@@ -89,6 +89,8 @@ impl SiteGenerator {
             }
         }
 
+        self.write_route_page(&site.showcase.path, self.render_showcase_page(&site, &site.showcase))?;
+
         Ok(())
     }
 
@@ -129,6 +131,13 @@ impl SiteGenerator {
             order: section.order,
         }));
 
+        let showcase = build_showcase_model();
+        navigation.push(NavigationItem {
+            title: showcase.title.clone(),
+            path: showcase.path.clone(),
+            order: showcase.order,
+        });
+
         navigation.sort_by(navigation_cmp_item);
 
         let home_page = pages
@@ -143,6 +152,7 @@ impl SiteGenerator {
                 "A small convention-based blog for pull request review demonstrations.",
             ),
             navigation,
+            showcase,
             home_page,
             pages,
             sections,
@@ -423,6 +433,50 @@ impl SiteGenerator {
             main_content
         )
     }
+
+    fn render_showcase_page(&self, site: &SiteModel, showcase: &ShowcaseModel) -> String {
+        let feature_cards = showcase
+            .entries
+            .iter()
+            .map(|entry| {
+                format!(
+                    concat!(
+                        "<article class=\"article-card\">",
+                        "<div class=\"article-card-meta\">{}</div>",
+                        "<h2>{}</h2>",
+                        "<p>{}</p>",
+                        "</article>"
+                    ),
+                    html_encode(&entry.label),
+                    html_encode(&entry.name),
+                    html_encode(&entry.summary)
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        self.render_document(
+            site,
+            &showcase.title,
+            &showcase.description,
+            &showcase.path,
+            format!(
+                concat!(
+                    "<article class=\"panel stack-gap\">",
+                    "{}",
+                    "<div class=\"markdown\">{}</div>",
+                    "<section class=\"stack-gap\" aria-labelledby=\"showcase-heading\">",
+                    "<h2 id=\"showcase-heading\">Featured work</h2>",
+                    "<div class=\"article-list\">{}</div>",
+                    "</section>",
+                    "</article>"
+                ),
+                render_panel_description(&showcase.description),
+                showcase.html,
+                feature_cards
+            ),
+        )
+    }
 }
 
 #[derive(Clone)]
@@ -480,13 +534,55 @@ struct NavigationItem {
 }
 
 #[derive(Clone)]
+struct ShowcaseEntry {
+    name: String,
+    label: String,
+    summary: String,
+}
+
+#[derive(Clone)]
+struct ShowcaseModel {
+    path: String,
+    title: String,
+    description: String,
+    order: Option<i32>,
+    html: String,
+    entries: Vec<ShowcaseEntry>,
+}
+
+#[derive(Clone)]
 struct SiteModel {
     title: String,
     description: String,
     navigation: Vec<NavigationItem>,
+    showcase: ShowcaseModel,
     home_page: PageModel,
     pages: Vec<PageModel>,
     sections: Vec<SectionModel>,
+}
+
+fn build_showcase_model() -> ShowcaseModel {
+    ShowcaseModel {
+        path: String::from("/showcase/"),
+        title: String::from("Showcase"),
+        description: String::from("Selected examples of the generator in use."),
+        order: Some(4),
+        html: render_markdown(
+            "# Showcase\n\nA curated set of project examples that product wants to present with a slightly different model than the article feed.",
+        ),
+        entries: vec![
+            ShowcaseEntry {
+                name: String::from("Docs migration"),
+                label: String::from("Case study"),
+                summary: String::from("Moved a handbook from ad hoc pages into the static generator."),
+            },
+            ShowcaseEntry {
+                name: String::from("Review clinic"),
+                label: String::from("Workshop"),
+                summary: String::from("Used the demo repo to practice architectural review feedback."),
+            },
+        ],
+    }
 }
 
 fn parse_markdown_file(file_path: &Path) -> Result<ParsedMarkdown, String> {
