@@ -292,13 +292,13 @@ impl SiteGenerator {
                         "<article class=\"article-card\">",
                         "<div class=\"article-card-meta\">{}</div>",
                         "<h2><a href=\"{}\">{}</a></h2>",
-                        "<p>{}</p>",
+                        "<div class=\"article-summary\">{}</div>",
                         "</article>"
                     ),
                     render_article_meta(article),
                     article.path,
                     html_encode(&article.title),
-                    html_encode(&article.summary)
+                    render_markdown(&article.summary)
                 )
             })
             .collect::<Vec<_>>()
